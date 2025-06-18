@@ -10,23 +10,23 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 csrf = CSRFProtect(app)
 
-# PostgreSQL database connection (set this in Render's env vars)
+# PostgreSQL database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# User model for PostgreSQL
+# Database model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
 
-# Flask-WTF form class
+# WTForms Login form
 class LoginForm(FlaskForm):
     email = StringField('email', validators=[DataRequired()])
-    passw = PasswordField('pass', validators=[DataRequired()])
+    passw = PasswordField('passw', validators=[DataRequired()])
 
-# Create database tables on startup
+# Initialize database (create tables)
 with app.app_context():
     db.create_all()
 
@@ -39,10 +39,10 @@ def get_csrf_token():
     return jsonify({'csrf_token': generate_csrf()})
 
 @app.route('/login', methods=['POST'])
-@csrf.exempt
+@csrf.exempt  # Exempt CSRF for API (frontend JS)
 def login():
-    form = LoginForm()
-    if form.validate_on_submit():
+    form = LoginForm(data=request.json)
+    if form.validate():
         email = form.email.data
         password = form.passw.data
 
@@ -59,7 +59,12 @@ def login():
         except Exception as e:
             return jsonify({'success': False, 'message': f'Database error: {str(e)}'}), 500
     else:
-        return jsonify({'success': False, 'message': 'Invalid input', 'errors': form.errors}), 400
+        print("Form validation errors:", form.errors)
+        return jsonify({
+            'success': False,
+            'message': 'Invalid input',
+            'errors': form.errors
+        }), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
