@@ -11,7 +11,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 csrf = CSRFProtect(app)
 
 # PostgreSQL database connection (set this in Render's env vars)
-app.config['postgresql://mfb_database_user:PiHSAGDKs7Eo4M68sO3vqaD5cJcFMsG4@dpg-d19b52h5pdvs73e61vsg-a.oregon-postgres.render.com/mfb_database'] = os.environ.get('postgresql://mfb_database_user:PiHSAGDKs7Eo4M68sO3vqaD5cJcFMsG4@dpg-d19b52h5pdvs73e61vsg-a.oregon-postgres.render.com/mfb_database')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
